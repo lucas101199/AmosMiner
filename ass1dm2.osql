@@ -22,28 +22,21 @@ load_lisp("string.lsp");
 /* URL normalization function definitions */
 /******************************************/
 
+/* Remove "HTTP://" from the beginning of a URL. */
 create function removeProtocol(Charstring url) -> Charstring
-/* TODO: Remove "HTTP://" from the beginning of a URL.
-  HINT: Use function replace(). */
- as replace(url, "HTTP://", "");
+ as replace(url, "http://", "");
 
+/* Return the last character of the string s. */
+create function lastChar(Charstring s) -> Charstring
+ as substring(s, char_length(s) - 1, char_length(s));
 
-create function lastChar(Charstring s)->Charstring
-/* TODO: Return the last character of the string s.
-  HINT: Use functions substring() and char_length(). */
- as substring(url, 0, char_length(url) - 1);
+/* Return all but the last characters of input string s */
+create function allButLastChar(Charstring s) -> Charstring
+ as substring(s, 0, char_length(s) - 2);
 
-create function allButLastChar(Charstring s)->Charstring
-/* TODO: Rerurn all but the last characters of input string s */
- as "all but last cha";
-
-create function removeTrailingSlash(Charstring url)->Charstring
-/* TODO: Remove trailing slash from url.
-  HINT: Use if-statement and the function lastChar().
-        A function that uses the if-statement is a
-        stored procedure. Hence one must use the
-        return statement to emit tuples. */
- as "No / at the end";
+/* Remove trailing slash from url. */
+create function removeTrailingSlash(Charstring url) -> Charstring
+ as 
 
 create function removeINDEXdotHTML(Charstring url)->Charstring
 /* TODO: Remove "INDEX.HTML" from url.
