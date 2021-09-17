@@ -36,11 +36,10 @@ create function allButLastChar(Charstring s) -> Charstring
 
 /* Remove trailing slash from url. */
 create function removeTrailingSlash(Charstring url) -> Charstring
- as 
+ as if lastChar(url) = "/" then return allButLastChar(url) else return url;
 
-create function removeINDEXdotHTML(Charstring url)->Charstring
-/* TODO: Remove "INDEX.HTML" from url.
-  HINT: Use function replace(). */
+/* Remove "INDEX.HTML" from url. */
+create function removeINDEXdotHTML(Charstring url) -> Charstring
  as " no INDEX.HTML";
 
 create function normalizeURL(Charstring url)->Charstring
