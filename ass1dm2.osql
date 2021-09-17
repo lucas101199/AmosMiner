@@ -24,7 +24,7 @@ load_lisp("string.lsp");
 
 /* Remove "HTTP://" from the beginning of a URL. */
 create function removeProtocol(Charstring url) -> Charstring
- as replace(url, "http://", "");
+ as replace(url, "HTTP://", "");
 
 /* Return the last character of the string s. */
 create function lastChar(Charstring s) -> Charstring
@@ -40,10 +40,10 @@ create function removeTrailingSlash(Charstring url) -> Charstring
 
 /* Remove "INDEX.HTML" from url. */
 create function removeINDEXdotHTML(Charstring url) -> Charstring
- as " no INDEX.HTML";
+ as replace(url, "INDEX.HTML", "");
 
-create function normalizeURL(Charstring url)->Charstring
 /* Performs simple URL normalization */
+create function normalizeURL(Charstring url) -> Charstring
  as removeTrailingSlash(removeINDEXdotHTML(removeProtocol(upper(url))));
 
 /*********************************************/
@@ -52,7 +52,7 @@ create function normalizeURL(Charstring url)->Charstring
 /*********************************************/
 
 /* Create a stored function / relation pages() */
-create function pages()->Bag of Charstring p as stored;
+create function pages() -> Bag of Charstring p as stored;
 /* TODO: Place an index on pages() if desirable */
 
 /* Create a stored function / relation links() */
