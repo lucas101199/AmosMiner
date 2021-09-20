@@ -26,21 +26,26 @@ load_lisp("string.lsp");
 create function removeProtocol(Charstring url) -> Charstring
  as replace(url, "HTTP://", "");
 
+
 /* Return the last character of the string s. */
 create function lastChar(Charstring s) -> Charstring
  as substring(s, char_length(s) - 1, char_length(s));
+
 
 /* Return all but the last characters of input string s */
 create function allButLastChar(Charstring s) -> Charstring
  as substring(s, 0, char_length(s) - 2);
 
+
 /* Remove trailing slash from url. */
 create function removeTrailingSlash(Charstring url) -> Charstring
  as if lastChar(url) = "/" then return allButLastChar(url) else return url;
 
+
 /* Remove "INDEX.HTML" from url. */
 create function removeINDEXdotHTML(Charstring url) -> Charstring
  as replace(url, "INDEX.HTML", "");
+
 
 /* Performs simple URL normalization */
 create function normalizeURL(Charstring url) -> Charstring
@@ -51,39 +56,45 @@ create function normalizeURL(Charstring url) -> Charstring
 /* and utilities to load / view data         */
 /*********************************************/
 
-/* Create a stored function / relation pages() */
+/* Create a stored function / relation pages()
+   Place an index on pages() if desirable */
 create function pages() -> Bag of Charstring p as stored;
-/* TODO: Place an index on pages() if desirable */
 
-/* Create a stored function / relation links() */
+
+/* Create a stored function / relation links()
+   Place an index on links() if desirable */
 create function links(Charstring f)->Bag of Charstring t as stored;
-/* Place an index on links() if desirable */
 
-create function populateLinks(Vector of Charstring vl)->Boolean
+
 /* Populates the function links() from a adjecency list vector of a page
   Also normalize the URLs of the pages */
+create function populateLinks(Vector of Charstring vl)->Boolean
  as add links(NormalizeURL(vl[0]))=NormalizeURL(vl[i])
     from Integer i
     where i > 0;
 
-create function addPage(Charstring p)->Boolean
+
 /* Adds a page to the function pages()
-  Also normalizes the URL of page p */
+   Also normalizes the URL of page p */
+create function addPage(Charstring p)->Boolean
  as add pages()=NormalizeURL(p);
 
-create function loadLinks(Charstring file)->Boolean
+
 /* Populates the function links() from an linkage FILE where
-  each line contains an adjecency list separated by space. */
+   each line contains an adjecency list separated by space. */
+create function loadLinks(Charstring file)->Boolean
  as populateLinks(cast(read_ntuples(file) as Vector of Charstring));
 
-create function loadPages(Charstring file)->Boolean
+
 /* Populates the function pages() from an linkage FILE where
-  each line contains an adjacency list separated by space.
-  The *first* page on such a list is the page that is added to pages() */
+   each line contains an adjacency list separated by space.
+   The *first* page on such a list is the page that is added to pages() */
+create function loadPages(Charstring file)->Boolean
  as addPage(cast(read_ntuples(file)[0] as Charstring));
 
-create function showLinks()->Bag of <Charstring, Charstring>
+
 /* Shows the contents of the function links() */
+create function showLinks()->Bag of <Charstring, Charstring>
  as select f, t
     from Charstring f, Charstring t
     where t in links(f);
