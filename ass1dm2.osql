@@ -304,18 +304,18 @@ create function updateOutlinks() -> Boolean
 
 create function initializePageRank(Number N) -> Boolean
 /* TODO: Set initial values for rank of all pages */
-as set rank(p) = 1/N
-   from Charstring p, Charstring q
-  where q in links(p);
+as for each Charstring p where p in pages()
+  begin
+    set rank(p) = 1/N;
+  end;
 
 create function calculateRank(Charstring p, Number d, Number N)->Number
 /* TODO: Calculate the rank of a page
   HINT: Use the aggregate functions sum() and count(). */
-as (1-d)/N + d*(sum(rank(
-  select q
+as (1-d)/N + d*(sum(
+  select rank(q)/outlinks(q)
   from Charstring q
   where p in links(q)
-)/outlinks(p)
 ));
 
 create function updateRank(Number d, Number N)->Boolean
@@ -339,8 +339,6 @@ begin
  declare Vector of Number r0;
  set r0 = vectorof(rank(pages()));
  updateRank(sse_d_N[1], sse_d_N[2]);
- dp(dim(vectorof(rank(pages()))),100);
- dp(dim(r0),100);
  return {roundto(sse(r0, vectorof(rank(pages()))), 3), sse_d_N[1], sse_d_N[2]};
 end;
 
@@ -361,12 +359,7 @@ begin
  /* initialize rank of pages to 1 */
  initializePageRank(N);
  /* iteration until convergence, mas 100 iterations */
- iterate(#'pageRank_iterator', 2, {-1, d, N}); /* input SSE is ignored */
+ iterate(#'pageRank_iterator', 100, {-1, d, N}); /* input SSE is ignored */
  /* Output top 10 ranked pages */
  return (topk(showRank(),10));
 end;
-
-
-/* loadLinks("dummy.nt");
-loadPages("dummy.nt");
-initializePageRank(2); */
