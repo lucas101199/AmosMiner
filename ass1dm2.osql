@@ -107,7 +107,8 @@ create function showDeadPages()->Bag of Charstring
   HINT: Use stored functions links() and pages() and the notany()
         Boolean operator / function. See manual!
   NOTE: These are not the pages that do not link to pages!!! */
- as select "Name of page with unknown link structure";
+ as select distinct t from Charstring t,Charstring f where t in links(f) and notany(t in pages());
+    
 
 create function removeDeadLinks()->Boolean
 /* TODO: Remove all links to a page f if we do not know
@@ -115,7 +116,8 @@ create function removeDeadLinks()->Boolean
   links(dummy)=f is not NIL.
   HINT : Use the remove statement and the function showdeadPages().
   NOTE: These are not the pages that do not link to pages!!! */
- as TRUE;
+ as remove links(f) = showdeadpages()
+    from Charstring f;
 
 
 /* Note that deleting a link from page f to t, where f only likns to t
@@ -159,7 +161,7 @@ end;
 create function sse(Vector of Number a, Vector of Number b)->Number
 /* TODO: Calculate the sum square error between two vectors.
   Used to check convergence of iterative calculation. */
- as 1;
+ as vsum(elempower(minus(a,b),2));
 
 
 /**********************************/
@@ -196,12 +198,16 @@ as for each Charstring p where p in pages()
 create function calculateAuthority(Charstring p)->Number
 /* TODO: Calculate the authority of page p.
   HINT: Use the aggregate function sum(). */
- as 1;
+ as sum(hubbiness(
+   select f
+   from Charstring f
+   where p in links(f)
+ ));
 
 create function calculateHubbiness(Charstring p)->Number
 /* TODO: Calculate the hubbiness of a page
   HINT: Use the aggregate function sum(). */
- as 1;
+ as sum(authority(links(p)));
 
 create function updateAuthority()->Boolean
 /* Updates the authority values of pages based on the
@@ -213,7 +219,9 @@ create function updateAuthority()->Boolean
 create function updateHubbiness()->Boolean
 /* TODO: Update the hubbiness values of pages based on the
   authority values of the pages that they link to. */
-as TRUE;
+as set hubbiness(p) = calculateHubbiness(p)
+    from Charstring p
+    where p in pages();
 
 create function enorm(Bag of Number b)->Number
 /* Calculates the Euclidean norm of a bag of numbers. */
@@ -230,7 +238,10 @@ create function normalizeAuthority()->Boolean
 
 create function normalizeHubbiness()->Boolean
 /*  TODO: Normalize Hubbiness() to unit length */
- as TRUE;
+ as set hubbiness(p) = hubbiness(p) / lenHub
+    from Charstring p, Number lenHub
+    where p in pages()
+      and lenHub = enorm(hubbiness(pages()));
 
 create function HITS_iterator(Number input)->Number as
 /* Iterative step of the HITS algorithm,
@@ -343,3 +354,8 @@ begin
  /* Output top 10 ranked pages */
  return (topk(showRank(),10));
 end;
+
+
+/* loadLinks("dummy.nt");
+loadPages("dummy.nt");
+initializeHITS(); */
